@@ -1,0 +1,214 @@
+---
+title: "Practical_ML"
+author: "Sudhakar"
+date: "April 1, 2016"
+output: html_document
+---
+**Title : Practical Machine Learning-Project**
+=============================
+
+**Summary:**
+===============
+The practical ML project focused on creating accurate and complex model for predicting output variable. We are going to see how ML algorithm solves real life situation and problem with the help of complex model.  The project uses data from the Weight Lifting Exercises (WLE) Dataset. The approach we propose for the Weight Lifting Exercises dataset is to investigate "how (well)" an activity was performed by the wearer.  In this process, a group of enthusiasts who take measurements about themselves regularly to improve their health.  In this project, The exercises were performed by six male participants aged between 20-28 years, and they were asked to perform one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl in five different fashions, identified as classes A, B, C, D and E. Class A corresponds to a correct execution of the exercise, and the remaining four classes identify common mistakes in this weight lifting exercise. (See the section on the [Weight Lifting Exercise Dataset](http://groupware.les.inf.puc-rio.br/har)  The goal of project is to predict the manner in which they did the exercise using the accurate Machine Learning algorithm.  The following analysis uses a Decision Trees (rpart) and random forest prediction algorithm for predicting manner of exercise performed by user.  The results of the analysis confirm that the random forest algorithm model achieves high prediction accuracy.
+
+
+**Data Source:**
+==================
+
+The training data for this project are available here:[pml-training.csv](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv)    
+The test data are available here:[pml-testing.csv](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv)    
+
+**Downloading the datasets:**
+===============================
+
+The following code download the training data and testing data automatically.The codes generate dataML folder where you can see all data in your working directory(check getwd()).   
+
+```{r, echo=TRUE}
+
+trainUrl ="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+testUrl = "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
+train_data = "./dataML/pml-training.csv"
+test_data = "./dataML/pml-testing.csv"
+
+if (!file.exists("./dataML")) {
+  dir.create("./dataML")
+}
+# if files does not exist, download the files
+if (!file.exists(train_data)) {
+  download.file(trainUrl, destfile=train_data)
+}
+if (!file.exists(test_data)) {
+  download.file(testUrl, destfile=test_data)
+}
+```
+
+**Package Requirement:** 
+=========================
+
+The following code work as install automatically required package for run below code smoothly.  
+```{r, echo=TRUE}
+list.of.packages <- c("dplyr", "caret", "rpart", "randomForest","VIM","rattle")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+```
+
+**Loading libraries:**
+========================
+
+```{r,echo=TRUE}
+suppressMessages(library(caret))
+suppressMessages(library(rpart))
+suppressMessages(library(randomForest)) 
+suppressMessages(library(dplyr))
+suppressMessages(library(rattle))
+suppressMessages(library(VIM))
+```
+
+**Data Exploration:**  
+=======================
+
+There are many missing values. These missing values come in two versions: the usual NA value, but also as values of the form "#DIV/0!". 
+```{r, echo=TRUE}
+
+pml_train <- read.csv("./dataML/pml-training.csv", header=T, comment.char = "",
+                      na.strings=c("","#DIV/0!","NA", " "))
+pml_test <- read.csv("./dataML/pml-testing.csv", header = T,comment.char = "",
+                     na.strings=c("","#DIV/0!","NA"," "))
+
+dim(pml_train)
+dim(pml_test)
+```
+
+**Processing and Cleaning the Data set:**
+=====================================
+
+The following del_Na function delete columns in the data set where the sum of  missing data (NA value) in coloumn is greater than 95%(because it is not easy to imputation) as well as dropped first to seven variable from the data set because these variable is not useful in the sense of following analysis.   
+
+```{r, echo=TRUE}
+
+del_NA <- function(x){
+        aggr_plot <- aggr(x,plot = F, numbers=TRUE,sortVars=TRUE,gap=3)
+        check_miss <- data.frame (aggr_plot$missings)
+        miss_pct <- mutate(check_miss, Count=(Count/nrow(x))*100)
+        miss_data <- subset(miss_pct, Count > 95.00)
+        miss_names <- miss_data$Variable
+        training_df <- x[, !(names(x) %in% miss_names)]
+        ## First to seven variable is not useful in data set. 
+        training_df <- training_df[,-c(1:7)]
+        return(training_df)
+}
+new_data_train <- del_NA(pml_train)
+new_data_test <- del_NA(pml_test)
+dim(new_data_train)
+dim(new_data_test)
+table(new_data_train$classe)
+```
+
+**Non zero Variance:**
+===========================
+
+We also try to remove variables with nearly zero variance but all variables show their variance greater than zero. So we keep all variables.
+```{r,echo=TRUE}
+nsv <- nearZeroVar(new_data_train, saveMetrics = T )
+head(nsv,10)
+```
+
+**Model Building:**
+======================
+
+Partitioning the Training data set (Validation-set Approach):
+===============================================================
+
+Following the usual practice in Machine Learning, we will split our data into a training data set (75% of the total cases) and a testing data set (with the remaining cases). This will allow us to estimate the out of sample error of our predictor. We will use the caret package for this purpose, and we begin by setting the seed to ensure reproducibility.
+
+```{r, echo=TRUE}
+
+set.seed(123)
+inTrain <- createDataPartition(y=new_data_train$classe,p=0.75, list=F)
+training <- new_data_train[inTrain,]
+testing <- new_data_train[-inTrain,]
+```
+
+Machine Learning Algorithm - Decision Tree classification :
+===========================================================
+
+We are going to use our first model as Decision Tree in ML (Machine Learning). Decision Trees (DTs) are a non-parametric supervised learning method used for classification. The goal is to create a model that predicts the value of a target variable by learning simple decision rules inferred from the data features.
+
+```{r,echo=TRUE}
+## Using caret package for create decision model. 
+set.seed(123)
+modfit <- train(classe~., method='rpart', data=training)
+## plot the decision tree
+fancyRpartPlot(modfit$finalModel)
+
+## predict decision tree model on test data
+pred <- predict(modfit, newdata=testing)
+confusionMatrix(pred, testing$classe)
+```
+
+**Note:** The Output result show that decision tree capture only 49% accuracy in the classification model. Let's try another method in dicision tree model. We will use "Class" (classification tree model) method in base rpart model.   
+
+```{r, echo=TRUE}
+## using base rpart model with "class"" method.
+set.seed(123)
+tree_model <- rpart(classe~., data=testing, method='class')
+pred <- predict(tree_model, newdata=testing, type='class')
+confusionMatrix(pred, testing$classe)
+```
+
+**Note:** The above output shows the improvement related to accuracy as from 49% to 73% in the subsample test data set.    
+
+Machine Learning Algorithm - Random Forest:
+===============================================
+
+Random Forests works as grows many classification trees. To classify a new object from an input vector, random forest put the input vector down each of the trees in the forest. Each tree gives a classification, and we say the tree "votes" for that class. The forest chooses the classification having the most votes (over all the trees in the forest).
+```{r,echo=TRUE}
+set.seed(123)
+rf_model<- randomForest(classe~.,data=training, importance=T)
+pred <- predict(rf_model, testing, type = "class")
+confusionMatrix(pred, testing$classe)
+
+```
+
+**Note:** Finally random forest classified all output variable label very well with great accuracy (99%). It's good accuracy from last model (Decision tree) and we are expected this accuracy. 
+
+**Applying Random forest model on in-sample Test data :**
+========================================================
+
+We will used random forest model on in-sample test data (new_data_test) first time. We use the following formula, which yielded a much better prediction in in-sample:
+Pml_write_files function for generate files with predictions to submit for assignment. 
+```{r,echo=TRUE}
+rf_pred <-  predict(rf_model, new_data_test, type = "class")
+
+pml_write_files <-  function(x){
+        n = length(x)
+        for(i in 1:n){
+                filename = paste0("problem_id_",i,".txt")
+                write.table(x[i],file=filename,quote=FALSE,
+                            row.names=FALSE,col.names=FALSE)
+        }
+}
+
+pml_write_files(rf_pred)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+   
+   
+   
+   
+   
+   
