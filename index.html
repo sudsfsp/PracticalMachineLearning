@@ -203,16 +203,16 @@ hr {
 <body>
 <h1><strong>Title : Practical Machine Learning-Project</strong></h1>
 
-<h1><strong>Summary:</strong></h1>
+<h2><strong>Summary:</strong></h2>
 
 <p>The practical ML project focused on creating accurate and complex model for predicting output variable. We are going to see how ML algorithm solves real life situation and problem with the help of complex model.  The project uses data from the Weight Lifting Exercises (WLE) Dataset. The approach we propose for the Weight Lifting Exercises dataset is to investigate &ldquo;how (well)&rdquo; an activity was performed by the wearer.  In this process, a group of enthusiasts who take measurements about themselves regularly to improve their health.  In this project, The exercises were performed by six male participants aged between 20-28 years, and they were asked to perform one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl in five different fashions, identified as classes A, B, C, D and E. Class A corresponds to a correct execution of the exercise, and the remaining four classes identify common mistakes in this weight lifting exercise. (See the section on the <a href="http://groupware.les.inf.puc-rio.br/har">Weight Lifting Exercise Dataset</a>  The goal of project is to predict the manner in which they did the exercise using the accurate Machine Learning algorithm.  The following analysis uses a Decision Trees (rpart) and random forest prediction algorithm for predicting manner of exercise performed by user.  The results of the analysis confirm that the random forest algorithm model achieves high prediction accuracy.</p>
 
-<h1><strong>Data Source:</strong></h1>
+<h2><strong>Data Source:</strong></h2>
 
 <p>The training data for this project are available here:<a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv">pml-training.csv</a><br/>
 The test data are available here:<a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv">pml-testing.csv</a>    </p>
 
-<h1><strong>Downloading the datasets:</strong></h1>
+<h2><strong>Downloading the datasets:</strong></h2>
 
 <p>The following code download the training data and testing data automatically.The codes generate dataML folder where you can see all data in your working directory(check getwd()).   </p>
 
@@ -234,7 +234,7 @@ if (!file.exists(test_data)) {
 }
 </code></pre>
 
-<h1><strong>Package Requirement:</strong> </h1>
+<h2><strong>Package Requirement:</strong> </h2>
 
 <p>The following code work as install automatically required package for run below code smoothly.  </p>
 
@@ -243,7 +243,7 @@ new.packages &lt;- list.of.packages[!(list.of.packages %in% installed.packages()
 if(length(new.packages)) install.packages(new.packages)
 </code></pre>
 
-<h1><strong>Loading libraries:</strong></h1>
+<h2><strong>Loading libraries:</strong></h2>
 
 <pre><code class="r">suppressMessages(library(caret))
 suppressMessages(library(rpart))
@@ -253,7 +253,7 @@ suppressMessages(library(rattle))
 suppressMessages(library(VIM))
 </code></pre>
 
-<h1><strong>Data Exploration:</strong>  </h1>
+<h2><strong>Data Exploration:</strong>  </h2>
 
 <p>There are many missing values. These missing values come in two versions: the usual NA value, but also as values of the form &ldquo;#DIV/0!&rdquo;. </p>
 
@@ -274,7 +274,7 @@ dim(pml_train)
 <pre><code>## [1]  20 160
 </code></pre>
 
-<h1><strong>Processing and Cleaning the Data set:</strong></h1>
+<h2><strong>Processing and Cleaning the Data set:</strong></h2>
 
 <p>The following del_Na function delete columns in the data set where the sum of  missing data (NA value) in coloumn is greater than 95%(because it is not easy to imputation) as well as dropped first to seven variable from the data set because these variable is not useful in the sense of following analysis.   </p>
 
@@ -311,7 +311,7 @@ dim(new_data_train)
 ## 5580 3797 3422 3216 3607
 </code></pre>
 
-<h1><strong>Non zero Variance:</strong></h1>
+<h2><strong>Non zero Variance:</strong></h2>
 
 <p>We also try to remove variables with nearly zero variance but all variables show their variance greater than zero. So we keep all variables.</p>
 
@@ -332,9 +332,9 @@ head(nsv,10)
 ## accel_belt_z      1.078767     1.5237998   FALSE FALSE
 </code></pre>
 
-<h1><strong>Model Building:</strong></h1>
+<h2><strong>Model Building:</strong></h2>
 
-<h1>Partitioning the Training data set (Validation-set Approach):</h1>
+<h2>Partitioning the Training data set (Validation-set Approach):</h2>
 
 <p>Following the usual practice in Machine Learning, we will split our data into a training data set (75% of the total cases) and a testing data set (with the remaining cases). This will allow us to estimate the out of sample error of our predictor. We will use the caret package for this purpose, and we begin by setting the seed to ensure reproducibility.</p>
 
@@ -344,7 +344,7 @@ training &lt;- new_data_train[inTrain,]
 testing &lt;- new_data_train[-inTrain,]
 </code></pre>
 
-<h1>Machine Learning Algorithm - Decision Tree classification :</h1>
+<h2>Machine Learning Algorithm - Decision Tree classification :</h2>
 
 <p>We are going to use our first model as Decision Tree in ML (Machine Learning). Decision Trees (DTs) are a non-parametric supervised learning method used for classification. The goal is to create a model that predicts the value of a target variable by learning simple decision rules inferred from the data features.</p>
 
@@ -439,7 +439,7 @@ confusionMatrix(pred, testing$classe)
 
 <p><strong>Note:</strong> The above output shows the improvement related to accuracy as from 49% to 73% in the subsample test data set.    </p>
 
-<h1>Machine Learning Algorithm - Random Forest:</h1>
+<h2>Machine Learning Algorithm - Random Forest:</h2>
 
 <p>Random Forests works as grows many classification trees. To classify a new object from an input vector, random forest put the input vector down each of the trees in the forest. Each tree gives a classification, and we say the tree &ldquo;votes&rdquo; for that class. The forest chooses the classification having the most votes (over all the trees in the forest).</p>
 
@@ -484,7 +484,7 @@ confusionMatrix(pred, testing$classe)
 
 <p><strong>Note:</strong> Finally random forest classified all output variable label very well with great accuracy (99%). It&#39;s good accuracy from last model (Decision tree) and we are expected this accuracy. </p>
 
-<h1><strong>Applying Random forest model on in-sample Test data :</strong></h1>
+<h2><strong>Applying Random forest model on in-sample Test data :</strong></h2>
 
 <p>We will used random forest model on in-sample test data (new_data_test) first time. We use the following formula, which yielded a much better prediction in in-sample:
 Pml_write_files function for generate files with predictions to submit for assignment. </p>
