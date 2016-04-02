@@ -192,7 +192,7 @@ modfit <- train(classe~., method='rpart', data=training)
 fancyRpartPlot(modfit$finalModel)
 ```
 
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
+![alt tag](https://raw.githubusercontent.com/sudsfsp/PracticalMachineLearning/b4cc499d11328bea867e083be82316f556448401/PNG/plot1.png) 
 
 ```r
 ## predict decision tree model on test data
