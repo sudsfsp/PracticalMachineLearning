@@ -332,31 +332,22 @@ confusionMatrix(pred, testing$classe)
 **Applying Random forest model on in-sample Test data :**
 ========================================================
 
-We will used random forest model on in-sample test data (new_data_test) first time. We use the following formula, which yielded a much better prediction in in-sample:
-Pml_write_files function for generate files with predictions to submit for assignment. 
+We will used random forest model on in-sample test data (new_data_test) first time.
 
 ```r
 rf_pred <-  predict(rf_model, new_data_test, type = "class")
 
-pml_write_files <-  function(x){
-        n = length(x)
-        for(i in 1:n){
-                filename = paste0("problem_id_",i,".txt")
-                write.table(x[i],file=filename,quote=FALSE,
-                            row.names=FALSE,col.names=FALSE)
-        }
-}
-
-pml_write_files(rf_pred)
+new_cols <- colnames(new_data_train)
+new_cols <- new_cols[-53]
+new_data_test <- new_data_test[,new_cols]
+predict(rf_model,new_data_test)
 ```
 
-
-
-
-
-
-
-
+```
+##  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 
+##  B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B 
+## Levels: A B C D E
+```
 
 
 
